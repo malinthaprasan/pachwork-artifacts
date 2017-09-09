@@ -1,9 +1,82 @@
 #!/bin/bash
+OUTPUT_HOME="WSO2-CARBON-UPDATE-4.4.0-9999"
+OUTPUT_HOME_JAGGERY_APPS=$OUTPUT_HOME/carbon.home/repository/deployment/server/jaggeryapps
+SUPPORT_CARBON_APIMGT_HOME="/home/malintha/wso2apim/gitworkspace/supportgit/apim210/carbon-apimgt-1"
 
-PRS=(276 294 297 293 280 285 298 299 286 300 301 302 303 305 288 279 283 284 292 295 289 290 296 304)
+#PRS=(276 294 297 293 280 285 298 299 286 300 301 302 303 305 288 279 283 284 292 295 289 290 296 304 309 298)
+#######################################################################################################################
+
+function canProcess() {
+    local filepath=$1
+    local filename=$(basename $filepath)
+    local dir=$(dirname $filepath)
+    if [[ $dir =~ ^features.* ]]
+    then
+        if [[ $filename =~ .*\.json$|.*\.js$|.*\.jag$|.*\.js$ ]]
+        then
+           echo true
+           return
+        fi
+    fi
+    echo false
+}
+
+function getDestination() {
+    local filepath=$1
+    local filename=$(basename $filepath)
+    local dir=$(dirname $filepath)
+    local destDir=$(echo $dir | sed -e 's/^features\/apimgt\/org\.wso2\.carbon\.apimgt\.[a-z]*\.feature\/src\/main\/resources\///g')
+    echo "$destDir"/$filename
+}
+
+function copyWithDirsToDestination() {
+    local srcFilepath=$1
+    local destFilepath=$2
+    local destDir=$(dirname $destFilepath)
+    test -d $destDir || mkdir -p $destDir && cp $srcFilepath $destFilepath
+}
+
+function isJava() {
+    local filename=$(basename $1)
+    if [[ $filename =~ .*\.java$ ]]
+    then
+       echo true
+       return
+    fi
+    echo false
+}
+
+function getJavaComp() {
+    echo  "$1" | awk -F"/src/[a-z]*/java" '{print $1}' 
+}
+
+
+#######################################################################################################################
+
+
+echo "Processing $2"
+prList=$(cat $2)
+for i in $prList; do
+    pr=$(echo $i | awk -F"https://github.com/[a-zA-Z0-9_\\-]*/carbon-apimgt/pull/" '{print $2}' | awk -F"/" '{print $1}')
+    PRS+=($pr)
+done
+
+
+echo "Extracted PR numbers : ${PRS[@]}"
+
+rm -r $OUTPUT_HOME
+mkdir -p $OUTPUT_HOME_JAGGERY_APPS
 
 for i in ${PRS[@]}; do
-    # echo "Listing content of $i" 
+
+    if [ -e "$i".json ]
+    then
+        true
+    else
+        echo "Getting content of $i" 
+        curl -H "Authorization: token $1" https://api.github.com/repos/wso2-support/carbon-apimgt/pulls/$i/files > $i.json
+    fi
+
     content=$(cat $i.json)
     length=$(echo $content | jq '. | length')
 
@@ -14,4 +87,45 @@ for i in ${PRS[@]}; do
     done
 done
 
-echo ${filesList[1]}
+sortedUniqueFiles=$(echo "${filesList[@]}" | tr ' ' '\n' | sort -u | tr '\"' ' ')
+
+echo "## Listing all changed files ##"
+for i in $sortedUniqueFiles; do
+    echo $i
+done
+
+echo
+
+
+
+echo "## Processing files ##"
+for i in $sortedUniqueFiles; do
+    echo "$i"
+    if [[ $(canProcess $i) == true ]]
+    then
+        src=$SUPPORT_CARBON_APIMGT_HOME/$i
+        dest=$OUTPUT_HOME_JAGGERY_APPS/$(getDestination $i)
+        echo "- copying to $dest"
+        copyWithDirsToDestination $src $dest
+    else
+        echo "- Ignored"
+        if [[ $(isJava $i) == true ]]
+        then
+            javaComp=$(getJavaComp $i)
+            javaCompList+=($javaComp)
+        fi
+    fi
+    echo
+done
+
+
+tree $OUTPUT_HOME
+
+sortedUniqueJavaComps=$(echo "${javaCompList[@]}" | tr ' ' '\n' | sort -u | tr '\"' ' ')
+echo "## Following java component jars needs to be manually copied ##"
+for i in $sortedUniqueJavaComps; do
+    echo $i
+done
+
+echo
+echo "## Finished ##"
