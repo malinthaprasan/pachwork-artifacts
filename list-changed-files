@@ -1,21 +1,17 @@
 #!/bin/bash
 
 PRS=(276 294 297 293 280 285 298 299 286 300 301 302 303 305 288 279 283 284 292 295 289 290 296 304)
-<< 123
+
 for i in ${PRS[@]}; do
-    echo "Listing content of $i" 
+    # echo "Listing content of $i" 
     content=$(cat $i.json)
     length=$(echo $content | jq '. | length')
 
     for (( c=0; c<$length; c++ ))
     do
-	    echo $content | jq ".[$c].filename"
+	    filename=$(echo $content | jq ".[$c].filename")
+	    filesList+=($filename)
     done
 done
-123
 
-echo 1
-
-
-
-
+echo ${filesList[1]}
