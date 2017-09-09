@@ -1,0 +1,9 @@
+#!/bin/bash
+
+PRS=(276 294 297 293 280 285 298 299 286 300 301 302 303 305 288 279 283 284 292 295 289 290 296 304)
+
+for i in ${PRS[@]}; do
+   echo "Getting content of $i" 
+   curl -H "Authorization: token $1" https://api.github.com/repos/wso2-support/carbon-apimgt/pulls/$i/files > $i.json
+done
+
