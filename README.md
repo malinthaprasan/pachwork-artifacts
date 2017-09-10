@@ -31,9 +31,9 @@ https://github.com/wso2-support/carbon-apimgt/pull/296
 
 **issues.txt**
 ```
-https://github.com/wso2-support/carbon-apimgt/pull/276
-https://github.com/wso2-support/carbon-apimgt/pull/293
-https://github.com/wso2-support/carbon-apimgt/pull/296
+https://wso2.org/jira/browse/APIMANAGER-5827
+https://wso2.org/jira/browse/APIMANAGER-5872
+https://github.com/wso2/product-apim/issues/1563
 ```
 
 * Update number
