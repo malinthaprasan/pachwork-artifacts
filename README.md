@@ -19,24 +19,20 @@ export SUPPORT_CARBON_APIMGT_HOME="/home/malintha/wso2apim/gitworkspace/supportg
 * A github token
 Refer https://github.com/settings/tokens
 
-* A file containing a list of PRs
-
-**pulls.txt**
+* A file containing a list of PRs (**pulls.txt**)
 ```
 https://github.com/wso2-support/carbon-apimgt/pull/276
 https://github.com/wso2-support/carbon-apimgt/pull/293
 https://github.com/wso2-support/carbon-apimgt/pull/296
 ```
-* A file containing a list of issue URLs
-
-**issues.txt**
+* A file containing a list of issue URLs (**issues.txt**)
 ```
 https://wso2.org/jira/browse/APIMANAGER-5827
 https://wso2.org/jira/browse/APIMANAGER-5872
 https://github.com/wso2/product-apim/issues/1563
 ```
 
-* Update number
+* Update number (**9999**)
 
 ### Usage:
 
