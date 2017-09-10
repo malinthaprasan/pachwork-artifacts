@@ -5,7 +5,7 @@ ISSUES_FILE=$3
 UPDATE_NUM=$4
 
 OUTPUT_HOME="WSO2-CARBON-UPDATE-4.4.0-$UPDATE_NUM"
-SUPPORT_CARBON_APIMGT_HOME="/home/malintha/wso2apim/gitworkspace/supportgit/apim210/carbon-apimgt-1"
+SUPPORT_CARBON_APIMGT_HOME=$(printenv SUPPORT_CARBON_APIMGT_HOME)
 
 JAGGERY_APPS="repository/deployment/server/jaggeryapps"
 OUTPUT_HOME_JAGGERY_APPS=$OUTPUT_HOME/carbon.home/$JAGGERY_APPS
@@ -15,9 +15,10 @@ GH_ISSUES_DIR="git-issues"
 UPDATE_DESC=$OUTPUT_HOME/update-descriptor.yaml
 
 
-rm -r $OUTPUT_HOME
+test -d $OUTPUT_HOME && rm -r $OUTPUT_HOME
 mkdir -p $OUTPUT_HOME_JAGGERY_APPS
 mkdir -p $JIRAS_DIR
+mkdir -p $PULLS_DIR
 mkdir -p $GH_ISSUES_DIR
 
 
