@@ -16,8 +16,7 @@ export SUPPORT_CARBON_APIMGT_HOME="/home/malintha/wso2apim/gitworkspace/supportg
 
 ### Inputs:
 
-* A github token
-Refer https://github.com/settings/tokens
+* A github token. Refer https://github.com/settings/tokens
 
 * A file containing a list of PRs (**pulls.txt**)
 ```
