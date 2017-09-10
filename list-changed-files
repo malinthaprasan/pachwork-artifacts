@@ -1,7 +1,12 @@
 #!/bin/bash
 OUTPUT_HOME="WSO2-CARBON-UPDATE-4.4.0-9999"
-OUTPUT_HOME_JAGGERY_APPS=$OUTPUT_HOME/carbon.home/repository/deployment/server/jaggeryapps
 SUPPORT_CARBON_APIMGT_HOME="/home/malintha/wso2apim/gitworkspace/supportgit/apim210/carbon-apimgt-1"
+
+
+OUTPUT_HOME_JAGGERY_APPS=$OUTPUT_HOME/carbon.home/repository/deployment/server/jaggeryapps
+PULLS_DIR="pull-requests"
+JIRAS_DIR="jiras"
+GH_ISSUES_DIR="git-issues"
 
 #PRS=(276 294 297 293 280 285 298 299 286 300 301 302 303 305 288 279 283 284 292 295 289 290 296 304 309 298)
 #######################################################################################################################
@@ -12,7 +17,7 @@ function canProcess() {
     local dir=$(dirname $filepath)
     if [[ $dir =~ ^features.* ]]
     then
-        if [[ $filename =~ .*\.json$|.*\.js$|.*\.jag$|.*\.js$ ]]
+        if [[ $filename =~ .*\.json$|.*\.js$|.*\.jag$ ]]
         then
            echo true
            return
@@ -54,78 +59,137 @@ function getJavaComp() {
 #######################################################################################################################
 
 
-echo "Processing $2"
-prList=$(cat $2)
-for i in $prList; do
-    pr=$(echo $i | awk -F"https://github.com/[a-zA-Z0-9_\\-]*/carbon-apimgt/pull/" '{print $2}' | awk -F"/" '{print $1}')
-    PRS+=($pr)
-done
+# echo "Processing pull request urls - $2"
+# prList=$(cat $2)
+# for i in $prList; do
+#     pr=$(echo $i | awk -F"https://github.com/[a-zA-Z0-9_\\-]*/carbon-apimgt/pull/" '{print $2}' | awk -F"/" '{print $1}')
+#     PRS+=($pr)
+# done
 
 
-echo "Extracted PR numbers : ${PRS[@]}"
+# echo "Extracted PR numbers : ${PRS[@]}"
+# echo
 
-rm -r $OUTPUT_HOME
-mkdir -p $OUTPUT_HOME_JAGGERY_APPS
 
-for i in ${PRS[@]}; do
 
-    if [ -e "$i".json ]
-    then
-        true
-    else
-        echo "Getting content of $i" 
-        curl -H "Authorization: token $1" https://api.github.com/repos/wso2-support/carbon-apimgt/pulls/$i/files > $i.json
+
+# rm -r $OUTPUT_HOME
+# mkdir -p $OUTPUT_HOME_JAGGERY_APPS
+
+# for i in ${PRS[@]}; do
+
+#     if [ -e "$PULLS_DIR/$i".json ]
+#     then
+#         true
+#     else
+#         echo "Getting content of $i" 
+#         curl -H "Authorization: token $1" https://api.github.com/repos/wso2-support/carbon-apimgt/pulls/$i/files > $PULLS_DIR/$i.json
+#     fi
+
+#     content=$(cat $PULLS_DIR/$i.json)
+#     length=$(echo $content | jq '. | length')
+
+#     for (( c=0; c<$length; c++ ))
+#     do
+# 	    filename=$(echo $content | jq ".[$c].filename")
+# 	    filesList+=($filename)
+#     done
+# done
+
+# sortedUniqueFiles=$(echo "${filesList[@]}" | tr ' ' '\n' | sort -u | tr '\"' ' ')
+
+# echo "## Listing all changed files ##"
+# for i in $sortedUniqueFiles; do
+#     echo $i
+# done
+
+# echo
+
+
+
+# echo "## Processing files ##"
+# for i in $sortedUniqueFiles; do
+#     echo "$i"
+#     if [[ $(canProcess $i) == true ]]
+#     then
+#         src=$SUPPORT_CARBON_APIMGT_HOME/$i
+#         dest=$OUTPUT_HOME_JAGGERY_APPS/$(getDestination $i)
+#         echo "- copying to $dest"
+#         copyWithDirsToDestination $src $dest
+#     else
+#         echo "- Ignored"
+#         if [[ $(isJava $i) == true ]]
+#         then
+#             javaComp=$(getJavaComp $i)
+#             javaCompList+=($javaComp)
+#         fi
+#     fi
+#     echo
+# done
+
+
+# tree $OUTPUT_HOME
+
+# sortedUniqueJavaComps=$(echo "${javaCompList[@]}" | tr ' ' '\n' | sort -u | tr '\"' ' ')
+# echo "## Following java component jars needs to be manually copied ##"
+# for i in $sortedUniqueJavaComps; do
+#     echo $i
+# done
+
+
+
+
+
+
+function isJiraIssue() {
+    if [[ $1 =~ .*https://wso2.org/jira.* ]]; then
+       echo true
+       return
     fi
+    echo false
+}
 
-    content=$(cat $i.json)
-    length=$(echo $content | jq '. | length')
+function isGHIssue() {
+    if [[ $1 =~ .*https://github.com/wso2.* ]]; then
+       echo true
+       return
+    fi
+    echo false
+}
 
-    for (( c=0; c<$length; c++ ))
-    do
-	    filename=$(echo $content | jq ".[$c].filename")
-	    filesList+=($filename)
-    done
-done
+function getJiraIssueId() {
+    local jiraId=$(echo $1 | awk -F"https://wso2.org/jira/browse/" '{print $2}')
+    echo $jiraId
+}
 
-sortedUniqueFiles=$(echo "${filesList[@]}" | tr ' ' '\n' | sort -u | tr '\"' ' ')
+mkdir -p $JIRAS_DIR
+mkdir -p $GH_ISSUES_DIR
 
-echo "## Listing all changed files ##"
-for i in $sortedUniqueFiles; do
-    echo $i
-done
+echo "Processing issue urls - $3"
+issueList=$(cat $3)
+for i in $issueList; do
+    if [[ $(isJiraIssue $i) == true ]]; then
+        jiraId=$(getJiraIssueId $i)
 
-echo
-
-
-
-echo "## Processing files ##"
-for i in $sortedUniqueFiles; do
-    echo "$i"
-    if [[ $(canProcess $i) == true ]]
-    then
-        src=$SUPPORT_CARBON_APIMGT_HOME/$i
-        dest=$OUTPUT_HOME_JAGGERY_APPS/$(getDestination $i)
-        echo "- copying to $dest"
-        copyWithDirsToDestination $src $dest
-    else
-        echo "- Ignored"
-        if [[ $(isJava $i) == true ]]
+        if [ -e "$JIRAS_DIR/$jiraId".json ]
         then
-            javaComp=$(getJavaComp $i)
-            javaCompList+=($javaComp)
+            true
+        else
+            echo "Getting content of $i" 
+            curl "https://wso2.org/jira/rest/api/2/issue/$jiraId" > $JIRAS_DIR/$jiraId.json
         fi
+
+    elif [[ $(isGHIssue $i) == true ]]; then
+        echo "GITH-"$i
+    else
+        echo "UNSUPPORTED-"$i
     fi
-    echo
+    # pr=$(echo $i | awk -F"https://github.com/[a-zA-Z0-9_\\-]*/carbon-apimgt/pull/" '{print $2}' | awk -F"/" '{print $1}')
+    # PRS+=($pr)
 done
 
 
-tree $OUTPUT_HOME
-
-sortedUniqueJavaComps=$(echo "${javaCompList[@]}" | tr ' ' '\n' | sort -u | tr '\"' ' ')
-echo "## Following java component jars needs to be manually copied ##"
-for i in $sortedUniqueJavaComps; do
-    echo $i
-done
+# getJiraIssueId "https://wso2.org/jira/browse/APIMANAGER-4976"
 
 echo
 echo "## Finished ##"
