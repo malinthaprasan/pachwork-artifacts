@@ -50,7 +50,7 @@ https://github.com/wso2/product-apim/issues/1563
 create-apim-update <github-token> pulls.txt issues.txt 9999
 ```
 
-### Outputs
+### Outputs of the command:
 
 #### Update folder
 
