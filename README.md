@@ -38,12 +38,6 @@ https://github.com/wso2/product-apim/issues/1563
 
 * Update number
 
-### Output:
-
-* List of changed *.jag, js and json files are fetched from PRs and automatically copied to correct location.
-* update-descriptor.yaml is created with modified files and issue desctriptions
-* Instructs what are the changed java components which needs to be manually added.
-
 ### Usage:
 
 ```sh
@@ -51,6 +45,10 @@ create-apim-update <github-token> pulls.txt issues.txt 9999
 ```
 
 ### Outputs of the command:
+
+* List of changed *.jag, js and json files are fetched from PRs and automatically copied to correct location.
+* update-descriptor.yaml is created with modified files and issue desctriptions
+* Instructs what are the changed java components which needs to be manually added.
 
 #### Update folder
 
