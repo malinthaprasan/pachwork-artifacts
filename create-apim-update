@@ -332,14 +332,24 @@ for i in ${componentList[@]}; do
 
             if [ -e "$relativePathDir/$relativePathFilename" ]
             then
-                true
+                # checks the validity of the jar/war and download if invalid
+                unzip -tq $relativePathDir/$relativePathFilename
+                if [[ $? == 0 ]]; then
+                    true #file is healthy. Do nothing.
+                else
+                    downloadArtifact=true
+                fi
             else
+                downloadArtifact=true
+            fi
+            
+            if [[ $downloadArtifact == true ]]; then
                 echo Downloading $relativePath
                 mkdir -p $relativePathDir
                 curl -u "$wso2username:$wso2pass" "https://supportbuild-wilkes.wso2.com/jenkins/job/carbon-apimgt-6.1.66/lastBuild/org.wso2.carbon.apimgt\$$i/artifact/$relativePath" > $relativePathDir/$relativePathFilename
                 echo Downloaded to $relativePathDir/$relativePathFilename
             fi
-            
+
             cp $relativePathDir/$relativePathFilename $dest
             echo "  - $destRelative" >> $UPDATE_DESC          
         fi
