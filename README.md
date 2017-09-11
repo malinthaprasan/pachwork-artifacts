@@ -1,24 +1,32 @@
 ## Update creator tool for APIM 2.1.0
 
-A bash script which communicates with GitHub and Jira REST APIs and generates file structure of a WUM update automatically for jag/js/json files with update-descriptor.yaml.
+A bash script which communicates with GitHub, Jira and Jenkins REST APIs and generates file structure of a WUM update automatically for `jag`, `js`, `json`, `jar` and `war` files. This will download modified `jar` or REST API `war` files from jenkins and copies to correct location in the WUM update. This will also autogenerate `update-descriptor.yaml` for the modified files as above and include issues with summary information.
 
 ### Prerequisites
 
-Install jq.
+* Install jq.
 ```
-sudo apt-get install jq
+$ sudo apt-get install jq
 ```
 
-Set a system variable SUPPORT_CARBON_APIMGT_HOME with the location to carbon-apimgt repo.
+* Set a system variable SUPPORT_CARBON_APIMGT_HOME with the location to carbon-apimgt repo.
 ```
-export SUPPORT_CARBON_APIMGT_HOME="/home/malintha/wso2apim/gitworkspace/supportgit/apim210/carbon-apimgt-1"
+$ export SUPPORT_CARBON_APIMGT_HOME="/home/malintha/wso2apim/gitworkspace/supportgit/apim210/carbon-apimgt-1"
+```
+
+### Usage:
+
+```sh
+$ create-apim-update <github-token> <pull-requests-filename> <issues-filename> <update-number> <wso2-username>
+
+# sample usage:
+$ create-apim-update 5abd6ab787eb1d6f7723456da35cba235ba1234b pull-requests.txt issues.txt 1610 user@wso2.com
 ```
 
 ### Inputs:
 
 * A github token. Refer https://github.com/settings/tokens
-
-* A file containing a list of PRs (**pulls.txt**)
+* A file containing a list of PRs (**pull-requests.txt**)
 ```
 https://github.com/wso2-support/carbon-apimgt/pull/276
 https://github.com/wso2-support/carbon-apimgt/pull/293
@@ -31,21 +39,18 @@ https://wso2.org/jira/browse/APIMANAGER-5872
 https://github.com/wso2/product-apim/issues/1563
 ```
 
-* Update number (**9999**)
+* Update number (**1610**)
+* WSO2 email username (**user@wso2.com**)
 
-### Usage:
 
-```sh
-create-apim-update <github-token> pulls.txt issues.txt 9999
-```
 
 ### Outputs of the command:
 
-* List of changed *.jag, js and json files are fetched from PRs and automatically copied to correct location.
-* update-descriptor.yaml is created with modified files and issue desctriptions
-* Instructs what are the changed java components which needs to be manually added.
+* List of changed `jag`, `js` and `json` files are fetched from PRs and automatically copied to correct location.
+* Updated `jar`,`war` files are downloaded from jenkins and automatically copied to `plugins` or `webapps` folder.
+* `update-descriptor.yaml` is created with modified files and issue descriptions.
 
-#### Update folder
+#### WUM Update folder generated for the above **pull-requests.txt** and **issues.txt**
 
 ```
 WSO2-CARBON-UPDATE-4.4.0-9999
@@ -77,7 +82,7 @@ WSO2-CARBON-UPDATE-4.4.0-9999
 16 directories, 6 files
 ```
 
-#### update-descriptor.yaml
+#### `update-descriptor.yaml` generated for the above **pull-requests.txt** and **issues.txt**
 ```
 update_number: 9999
 platform_version: 4.4.0
@@ -99,11 +104,3 @@ file_changes:
   - repository/deployment/server/jaggeryapps/publisher/site/themes/wso2/templates/item-implement/template.jag
   - repository/deployment/server/jaggeryapps/publisher/site/themes/wso2/templates/usage/template.jag
 ```
-
-#### List of java components that are affected
-```
-## Following java component jars needs to be manually copied ##
-components/apimgt/org.wso2.carbon.apimgt.rest.api.publisher
-components/apimgt/org.wso2.carbon.apimgt.rest.api.store
-```
-

@@ -3,34 +3,37 @@ GH_TOKEN=$1
 PULL_REQ_FILE=$2
 ISSUES_FILE=$3
 UPDATE_NUM=$4
+wso2username=$5
 
 OUTPUT_HOME="WSO2-CARBON-UPDATE-4.4.0-$UPDATE_NUM"
 SUPPORT_CARBON_APIMGT_HOME=$(printenv SUPPORT_CARBON_APIMGT_HOME)
 
 JAGGERY_APPS="repository/deployment/server/jaggeryapps"
+WEB_APPS="repository/deployment/server/webapps"
+PLUGINS="repository/components/plugins"
 OUTPUT_HOME_JAGGERY_APPS=$OUTPUT_HOME/carbon.home/$JAGGERY_APPS
+OUTPUT_HOME_WEB_APPS=$OUTPUT_HOME/carbon.home/$WEB_APPS
+OUTPUT_HOME_PLUGINS=$OUTPUT_HOME/carbon.home/$PLUGINS
 PULLS_DIR="pull-requests"
 JIRAS_DIR="jiras"
 GH_ISSUES_DIR="git-issues"
+JENKINS_DIR="jenkins"
+JENKINS_META=$JENKINS_DIR/meta
+JENKINS_DOWNLOADED=$JENKINS_DIR/downloaded
 UPDATE_DESC=$OUTPUT_HOME/update-descriptor.yaml
 
 
-test -d $OUTPUT_HOME && rm -r $OUTPUT_HOME
-mkdir -p $OUTPUT_HOME_JAGGERY_APPS
-mkdir -p $JIRAS_DIR
-mkdir -p $PULLS_DIR
-mkdir -p $GH_ISSUES_DIR
+FILE_MAPPINGS=$(cat <<- END
+{
+    "org.wso2.carbon.apimgt.rest.api.publisher-6.1.66.war":"api#am#publisher#v0.11.war",
+    "org.wso2.carbon.apimgt.rest.api.store-6.1.66.war":"api#am#store#v0.11.war",
+    "org.wso2.carbon.apimgt.rest.api.admin-6.1.66.war":"api#am#admin#v0.11.war"
+}
+END
+)
 
 
-echo "update_number: $UPDATE_NUM" > $UPDATE_DESC
-echo "platform_version: 4.4.0" >> $UPDATE_DESC
-echo "platform_name: wilkes" >> $UPDATE_DESC
-echo "applies_to: APIM 2.1.0" >> $UPDATE_DESC
-echo "bug_fixes:" >> $UPDATE_DESC
-
-
-# PRS=(276 294 297 293 280 285 298 299 286 300 301 302 303 305 288 279 283 284 292 295 289 290 296 304 309 298)
-######################################################################################################################
+################################################# FUNCTIONS #####################################################################
 
 function canProcess() {
     local filepath=$1
@@ -93,6 +96,39 @@ function isGHIssue() {
     echo false
 }
 
+function isJarOrWar() {
+    if [[ $1 =~ .*\.jar || $1 =~ .*\.war ]]; then
+       echo true
+       return
+    fi
+    echo false
+}
+
+function isJar() {
+    if [[ $1 =~ .*\.jar ]]; then
+       echo true
+       return
+    fi
+    echo false
+}
+
+function isWar() {
+    if [[ $1 =~ .*\.war ]]; then
+       echo true
+       return
+    fi
+    echo false
+}
+
+function getFinalFilename() {
+    local filename=$(echo $1 | awk -F"/" '{print $NF}')
+    if [[ $(echo $FILE_MAPPINGS | jq ".[\"$filename\"]") == null ]]; then
+        echo $filename | tr '-' '_'
+    else
+        echo $FILE_MAPPINGS | jq ".[\"$filename\"]" | tr -d "\""
+    fi
+}
+
 function getJiraIssueId() {
     local jiraId=$(echo $1 | awk -F"https://wso2.org/jira/browse/" '{print $2}')
     echo $jiraId
@@ -108,10 +144,38 @@ function getGithubIssueId() {
     echo $ghIssueId
 }
 
-#######################################################################################################################
+################################################### JIRA / GITHUB ISSUES ####################################################################
 
+if [[ $# -eq 5 ]]; then
+    true
+else
+    echo 'Wrong number of args supplied.'
+    echo 'Usage: create-apim-update <github-token> <pull-requests-filename> <issues-filename> <update-number> <wso2-username>'
+    echo
+    echo 'create-apim-update 5abd6ab787eb1d6f7723456da35cba235ba1234b pull-requests.txt issues.txt 1610 malinthaa@wso2.com'
+    exit 1
+fi
 
+read -s -p "Enter Password for $wso2username: " wso2pass
+echo
 
+test -d $OUTPUT_HOME && rm -r $OUTPUT_HOME
+mkdir -p $OUTPUT_HOME_JAGGERY_APPS
+mkdir -p $OUTPUT_HOME_WEB_APPS
+mkdir -p $OUTPUT_HOME_PLUGINS
+mkdir -p $JIRAS_DIR
+mkdir -p $PULLS_DIR
+mkdir -p $GH_ISSUES_DIR
+mkdir -p $JENKINS_META
+
+test -d $JENKINS_DOWNLOADED && rm -r $JENKINS_DOWNLOADED
+mkdir -p $JENKINS_DOWNLOADED
+
+echo "update_number: $UPDATE_NUM" > $UPDATE_DESC
+echo "platform_version: 4.4.0" >> $UPDATE_DESC
+echo "platform_name: wilkes" >> $UPDATE_DESC
+echo "applies_to: APIM 2.1.0" >> $UPDATE_DESC
+echo "bug_fixes:" >> $UPDATE_DESC
 
 echo "Processing issue urls - $ISSUES_FILE"
 issueList=$(cat $ISSUES_FILE)
@@ -155,13 +219,13 @@ for i in $issueList; do
 done
 
 echo 'description: |' >> $UPDATE_DESC
-echo '  This is a sample description. Please update.' >> $UPDATE_DESC
+echo '  This is a consolidated update which includes fixes for all the issues mentioned in Bug Fixes section.' >> $UPDATE_DESC
 echo 'file_changes:' >> $UPDATE_DESC
 echo '  added_files: []' >> $UPDATE_DESC
 echo '  removed_files: []' >> $UPDATE_DESC
 echo '  modified_files:' >> $UPDATE_DESC
 
-######################################################################################################################
+#################################################### PULL REQUESTS ##################################################################
 
 
 echo "Processing pull request urls - $PULL_REQ_FILE"
@@ -197,10 +261,10 @@ done
 
 sortedUniqueFiles=$(echo "${filesList[@]}" | tr ' ' '\n' | sort -u | tr '\"' ' ')
 
-echo "## Listing all changed files ##"
-for i in $sortedUniqueFiles; do
-    echo $i
-done
+# echo "## Listing all changed files ##"
+# for i in $sortedUniqueFiles; do
+#     echo $i
+# done
 
 echo
 
@@ -226,6 +290,53 @@ for i in $sortedUniqueFiles; do
     echo
 done
 
+
+sortedUniqueJavaComps=$(echo "${javaCompList[@]}" | tr ' ' '\n' | sort -u | tr '\"' ' ')
+echo "## Following java component jars needs to be downloaded ##"
+for i in $sortedUniqueJavaComps; do
+    comp=$(echo $i | awk -F"components/apimgt/" '{print $2}')
+    componentList+=($comp)
+    echo $comp
+done
+
+######################################################## JENKINS ##############################################################
+echo
+
+for i in ${componentList[@]}; do
+    if [ -e "$JENKINS_META/$i".json ]
+    then
+        true
+    else
+        echo "Downloading meta info of $i" 
+        curl -u "$wso2username:$wso2pass" "https://supportbuild-wilkes.wso2.com/jenkins/job/carbon-apimgt-6.1.66/lastBuild/org.wso2.carbon.apimgt\$$i/api/json?tree=artifacts%5BrelativePath%5D" > $JENKINS_META/$i.json
+    fi
+
+    content=$(cat "$JENKINS_META/$i".json)
+    length=$(echo $content | jq '.artifacts | length')
+
+    for (( c=0; c<$length; c++ ))
+    do
+        relativePath=$(echo $content | jq ".artifacts[$c].relativePath" | tr -d '"')
+        if [[ $(isJarOrWar $relativePath) == true ]]; then
+            echo Downloading $relativePath
+            if [[ $(isJar $relativePath) == true  ]]; then
+                dest=$OUTPUT_HOME_PLUGINS/$(getFinalFilename $relativePath)
+                destRelative=$PLUGINS/$(getFinalFilename $relativePath)
+            elif [[ $(isWar $relativePath) == true ]]; then
+                dest=$OUTPUT_HOME_WEB_APPS/$(getFinalFilename $relativePath)
+                destRelative=$WEB_APPS/$(getFinalFilename $relativePath)
+            else
+                echo Unsupported file: $relativePath
+            fi
+            curl -u "$wso2username:$wso2pass" "https://supportbuild-wilkes.wso2.com/jenkins/job/carbon-apimgt-6.1.66/lastBuild/org.wso2.carbon.apimgt\$$i/artifact/$relativePath" > $dest
+            echo Downloaded to $dest
+            echo "  - $destRelative" >> $UPDATE_DESC
+        fi
+    done
+
+done
+
+
 echo
 echo "$OUTPUT_HOME"
 echo "======================"
@@ -235,11 +346,5 @@ echo "update-descriptor.yaml"
 echo "======================"
 cat $UPDATE_DESC
 echo
-
-sortedUniqueJavaComps=$(echo "${javaCompList[@]}" | tr ' ' '\n' | sort -u | tr '\"' ' ')
-echo "## Following java component jars needs to be manually copied ##"
-for i in $sortedUniqueJavaComps; do
-    echo $i
-done
 
 echo "## Finished ##"
