@@ -342,9 +342,6 @@ for i in ${componentList[@]}; do
             
             cp $relativePathDir/$relativePathFilename $dest
             echo "  - $destRelative" >> $UPDATE_DESC          
-            # curl -u "$wso2username:$wso2pass" "https://supportbuild-wilkes.wso2.com/jenkins/job/carbon-apimgt-6.1.66/lastBuild/org.wso2.carbon.apimgt\$$i/artifact/$relativePath" > $dest
-            # echo Downloaded to $dest
-            # echo "  - $destRelative" >> $UPDATE_DESC
         fi
     done
 
