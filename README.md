@@ -1,6 +1,8 @@
 ## Update creator tool for APIM 2.1.0
 
-A bash script which communicates with GitHub, Jira and Jenkins REST APIs and generates file structure of a WUM update automatically for `jag`, `js`, `json`, `jar` and `war` files. This will download modified `jar` or REST API `war` files from jenkins and copies to correct location in the WUM update. This will also autogenerate `update-descriptor.yaml` for the modified files as above and include issues with summary information.
+A bash script which communicates with GitHub, Jira and Jenkins REST APIs and generates file structure of a WUM update automatically for `jag`, `js`, `json`, `jar` and `war` files given a list of GitHub pull requests and a list of JiRA or GitHub issues.
+
+`jag`, `js`, `json` files are taken from a provided `carbon-apimgt` repo and modified `jar` or REST API `war` files will be downloaded from jenkins. Files will be copied to correct location in the WUM update. This will also autogenerate `update-descriptor.yaml` for the modified files as above and include issues with summary information.
 
 ### Prerequisites
 
