@@ -59,7 +59,7 @@ https://github.com/wso2/product-apim/issues/1563
 #### WUM Update folder generated for the above **pull-requests.txt** and **issues.txt**
 
 ```
-WSO2-CARBON-UPDATE-4.4.0-9999
+WSO2-CARBON-UPDATE-4.4.0-1610
 ======================
 WSO2-CARBON-UPDATE-4.4.0-1610
 ├── carbon.home
