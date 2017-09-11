@@ -167,8 +167,6 @@ mkdir -p $JIRAS_DIR
 mkdir -p $PULLS_DIR
 mkdir -p $GH_ISSUES_DIR
 mkdir -p $JENKINS_META
-
-test -d $JENKINS_DOWNLOADED && rm -r $JENKINS_DOWNLOADED
 mkdir -p $JENKINS_DOWNLOADED
 
 echo "update_number: $UPDATE_NUM" > $UPDATE_DESC
@@ -318,7 +316,7 @@ for i in ${componentList[@]}; do
     do
         relativePath=$(echo $content | jq ".artifacts[$c].relativePath" | tr -d '"')
         if [[ $(isJarOrWar $relativePath) == true ]]; then
-            echo Downloading $relativePath
+            
             if [[ $(isJar $relativePath) == true  ]]; then
                 dest=$OUTPUT_HOME_PLUGINS/$(getFinalFilename $relativePath)
                 destRelative=$PLUGINS/$(getFinalFilename $relativePath)
@@ -328,9 +326,25 @@ for i in ${componentList[@]}; do
             else
                 echo Unsupported file: $relativePath
             fi
-            curl -u "$wso2username:$wso2pass" "https://supportbuild-wilkes.wso2.com/jenkins/job/carbon-apimgt-6.1.66/lastBuild/org.wso2.carbon.apimgt\$$i/artifact/$relativePath" > $dest
-            echo Downloaded to $dest
-            echo "  - $destRelative" >> $UPDATE_DESC
+            
+            relativePathDir=$JENKINS_DOWNLOADED/$(dirname $relativePath)
+            relativePathFilename=$(basename $relativePath)
+
+            if [ -e "$relativePathDir/$relativePathFilename" ]
+            then
+                true
+            else
+                echo Downloading $relativePath
+                mkdir -p $relativePathDir
+                curl -u "$wso2username:$wso2pass" "https://supportbuild-wilkes.wso2.com/jenkins/job/carbon-apimgt-6.1.66/lastBuild/org.wso2.carbon.apimgt\$$i/artifact/$relativePath" > $relativePathDir/$relativePathFilename
+                echo Downloaded to $relativePathDir/$relativePathFilename
+            fi
+            
+            cp $relativePathDir/$relativePathFilename $dest
+            echo "  - $destRelative" >> $UPDATE_DESC          
+            # curl -u "$wso2username:$wso2pass" "https://supportbuild-wilkes.wso2.com/jenkins/job/carbon-apimgt-6.1.66/lastBuild/org.wso2.carbon.apimgt\$$i/artifact/$relativePath" > $dest
+            # echo Downloaded to $dest
+            # echo "  - $destRelative" >> $UPDATE_DESC
         fi
     done
 

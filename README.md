@@ -55,28 +55,35 @@ https://github.com/wso2/product-apim/issues/1563
 ```
 WSO2-CARBON-UPDATE-4.4.0-9999
 ======================
-WSO2-CARBON-UPDATE-4.4.0-9999
+WSO2-CARBON-UPDATE-4.4.0-1610
 ├── carbon.home
 │   └── repository
+│       ├── components
+│       │   └── plugins
+│       │       ├── org.wso2.carbon.apimgt.gateway_6.1.66.jar
+│       │       └── org.wso2.carbon.apimgt.jms.listener_6.1.66.jar
 │       └── deployment
 │           └── server
-│               └── jaggeryapps
-│                   └── publisher
-│                       └── site
-│                           ├── conf
-│                           │   └── locales
-│                           │       └── jaggery
-│                           │           └── locale_default.json
-│                           └── themes
-│                               └── wso2
-│                                   └── templates
-│                                       ├── item-implement
-│                                       │   ├── initializer.jag
-│                                       │   ├── js
-│                                       │   │   └── api-implementation.js
-│                                       │   └── template.jag
-│                                       └── usage
-│                                           └── template.jag
+│               ├── jaggeryapps
+│               │   └── publisher
+│               │       └── site
+│               │           └── themes
+│               │               └── wso2
+│               │                   ├── libs
+│               │                   │   └── load-tabs.js
+│               │                   └── templates
+│               │                       ├── item-design
+│               │                       │   └── template.jag
+│               │                       ├── item-implement
+│               │                       │   ├── initializer.jag
+│               │                       │   ├── js
+│               │                       │   │   └── api-implementation.js
+│               │                       │   └── template.jag
+│               │                       └── life-cycles
+│               │                           └── template.jag
+│               └── webapps
+│                   ├── api#am#publisher#v0.11.war
+│                   └── api#am#store#v0.11.war
 └── update-descriptor.yaml
 
 16 directories, 6 files
@@ -84,23 +91,32 @@ WSO2-CARBON-UPDATE-4.4.0-9999
 
 #### `update-descriptor.yaml` generated for the above **pull-requests.txt** and **issues.txt**
 ```
-update_number: 9999
+update_number: 1610
 platform_version: 4.4.0
 platform_name: wilkes
 applies_to: APIM 2.1.0
 bug_fixes:
-  APIMANAGER-5827: Description mismatch in API Publisher UI
   APIMANAGER-5872: Update the API using PUT method thumbnailUri get set to null, api summary not contains thumbnailUrl and resource are resetting after update only the thumbnail
+  APIMANAGER-5880: [APIM] Admin Password getting printed in JMS Error log
+  APIMANAGER-4970: Life cycle graph can be zoom in and out in an unrealistic way.
+  APIMANAGER-5719: Improving the probability of honoring API's synapse resources' order when overriding resources are defined
+  APIMANAGER-5759: Details of the APIs created via Publisher UI cannot list using Publisher Rest APIs
   https://github.com/wso2/product-apim/issues/1563: Mediation sequence upload fails after updating tittle attribute of swagger definition
 description: |
-  This is a sample description. Please update.
+  This is a consolidated update which includes fixes for all the issues mentioned in Bug Fixes section.
 file_changes:
   added_files: []
   removed_files: []
   modified_files:
-  - repository/deployment/server/jaggeryapps/publisher/site/conf/locales/jaggery/locale_default.json
+  - repository/deployment/server/jaggeryapps/publisher/site/themes/wso2/libs/load-tabs.js
+  - repository/deployment/server/jaggeryapps/publisher/site/themes/wso2/templates/item-design/template.jag
   - repository/deployment/server/jaggeryapps/publisher/site/themes/wso2/templates/item-implement/initializer.jag
   - repository/deployment/server/jaggeryapps/publisher/site/themes/wso2/templates/item-implement/js/api-implementation.js
   - repository/deployment/server/jaggeryapps/publisher/site/themes/wso2/templates/item-implement/template.jag
-  - repository/deployment/server/jaggeryapps/publisher/site/themes/wso2/templates/usage/template.jag
+  - repository/deployment/server/jaggeryapps/publisher/site/themes/wso2/templates/life-cycles/template.jag
+  - repository/components/plugins/org.wso2.carbon.apimgt.gateway_6.1.66.jar
+  - repository/components/plugins/org.wso2.carbon.apimgt.jms.listener_6.1.66.jar
+  - repository/deployment/server/webapps/api#am#publisher#v0.11.war
+  - repository/deployment/server/webapps/api#am#store#v0.11.war
+
 ```
