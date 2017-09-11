@@ -28,14 +28,20 @@ $ create-apim-update 5abd6ab787eb1d6f7723456da35cba235ba1234b pull-requests.txt 
 * A github token. Refer https://github.com/settings/tokens
 * A file containing a list of PRs (**pull-requests.txt**)
 ```
-https://github.com/wso2-support/carbon-apimgt/pull/276
 https://github.com/wso2-support/carbon-apimgt/pull/293
+https://github.com/wso2-support/carbon-apimgt/pull/280
+https://github.com/wso2-support/carbon-apimgt/pull/286
+https://github.com/wso2-support/carbon-apimgt/pull/305
+https://github.com/wso2-support/carbon-apimgt/pull/292
 https://github.com/wso2-support/carbon-apimgt/pull/296
 ```
 * A file containing a list of issue URLs (**issues.txt**)
 ```
-https://wso2.org/jira/browse/APIMANAGER-5827
 https://wso2.org/jira/browse/APIMANAGER-5872
+https://wso2.org/jira/browse/APIMANAGER-5880
+https://wso2.org/jira/browse/APIMANAGER-4970
+https://wso2.org/jira/browse/APIMANAGER-5719
+https://wso2.org/jira/browse/APIMANAGER-5759
 https://github.com/wso2/product-apim/issues/1563
 ```
 
