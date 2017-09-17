@@ -15,7 +15,7 @@ A bash script which communicates with GitHub, Jira and Jenkins REST APIs and gen
 * Set a system variable WSO2AM210\_ZIP\_PATH with the location to API Manager 2.1.0 zip file.
 
   ```
-  $ export WSO2AM210_ZIP_PATH="export WSO2AM210_ZIP_PATH=/work-2/soft/wso2/wso2am-2.1.0.zip"
+  $ export WSO2AM210_ZIP_PATH="/work-2/soft/wso2/wso2am-2.1.0.zip"
   ```
 
 * Set a system variable SUPPORT\_CARBON\_APIMGT\_HOME with the location to carbon-apimgt repo. Make sure carbon-apimgt repo is up-to-date. Keep it switched to `support-6.1.66` branch.
