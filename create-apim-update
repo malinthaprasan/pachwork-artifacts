@@ -7,6 +7,7 @@ wso2username=$5
 
 OUTPUT_HOME="WSO2-CARBON-UPDATE-4.4.0-$UPDATE_NUM"
 SUPPORT_CARBON_APIMGT_HOME=$(printenv SUPPORT_CARBON_APIMGT_HOME)
+WSO2AM210_ZIP_PATH=$(printenv WSO2AM210_ZIP_PATH)
 
 JAGGERY_APPS="repository/deployment/server/jaggeryapps"
 WEB_APPS="repository/deployment/server/webapps"
@@ -21,7 +22,7 @@ JENKINS_DIR="jenkins"
 JENKINS_META=$JENKINS_DIR/meta
 JENKINS_DOWNLOADED=$JENKINS_DIR/downloaded
 UPDATE_DESC=$OUTPUT_HOME/update-descriptor.yaml
-
+CREATE_APIM_UPDATE_LOCATION="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 FILE_MAPPINGS=$(cat <<- END
 {
@@ -193,7 +194,7 @@ for i in $issueList; do
         content=$(cat $JIRAS_DIR/$jiraId.json)
         issueSummary=$(echo $content | jq '.fields.summary' | tr -d '"')
         echo $jiraId": "$issueSummary
-        echo "  "$jiraId": "$issueSummary >> $UPDATE_DESC
+        echo "  "$jiraId": "'"'$issueSummary'"' >> $UPDATE_DESC
 
     elif [[ $(isGHIssue $i) == true ]]; then
         ghIssueId=$(getGithubIssueId $i)
@@ -209,7 +210,7 @@ for i in $issueList; do
         content=$(cat $GH_ISSUES_DIR/$ghIssueId.json)
         issueSummary=$(echo $content | jq '.title' | tr -d '"')
         echo $i": "$issueSummary
-        echo "  "$i": "$issueSummary >> $UPDATE_DESC
+        echo "  "$i": "'"'$issueSummary'"' >> $UPDATE_DESC
     else
         echo "Unsupported Issue-"$i
     fi
@@ -335,7 +336,7 @@ for i in ${componentList[@]}; do
                 # checks the validity of the jar/war and download if invalid
                 unzip -tq $relativePathDir/$relativePathFilename
                 if [[ $? == 0 ]]; then
-                    true #file is healthy. Do nothing.
+                    downloadArtifact=false # file is healthy
                 else
                     downloadArtifact=true
                 fi
@@ -348,6 +349,13 @@ for i in ${componentList[@]}; do
                 mkdir -p $relativePathDir
                 curl -u "$wso2username:$wso2pass" "https://supportbuild-wilkes.wso2.com/jenkins/job/carbon-apimgt-6.1.66/lastBuild/org.wso2.carbon.apimgt\$$i/artifact/$relativePath" > $relativePathDir/$relativePathFilename
                 echo Downloaded to $relativePathDir/$relativePathFilename
+                unzip -tq $relativePathDir/$relativePathFilename
+                if [[ $? == 0 ]]; then
+                    true #file is healthy. Do nothing.
+                else
+                    echo "Downloaded $relativePathFilename is corrupted. Please re-run the tool. Exiting.. "
+                    exit 1
+                fi
             fi
 
             cp $relativePathDir/$relativePathFilename $dest
@@ -356,6 +364,8 @@ for i in ${componentList[@]}; do
     done
 
 done
+
+######################################################## FINALLIZING ##############################################################
 
 
 echo
@@ -367,5 +377,16 @@ echo "update-descriptor.yaml"
 echo "======================"
 cat $UPDATE_DESC
 echo
+
+cp $CREATE_APIM_UPDATE_LOCATION/resources/LICENSE.txt $OUTPUT_HOME
+cp $CREATE_APIM_UPDATE_LOCATION/resources/NOT_A_CONTRIBUTION.txt $OUTPUT_HOME
+
+zipFileName="WSO2-CARBON-UPDATE-4.4.0-"$UPDATE_NUM".zip"
+echo "Creating $zipFileName"
+
+zip -rq $zipFileName $OUTPUT_HOME
+wum-uc validate $zipFileName $WSO2AM210_ZIP_PATH
+echo
+echo "Created updated in: "$(pwd)/$zipFileName
 
 echo "## Finished ##"
