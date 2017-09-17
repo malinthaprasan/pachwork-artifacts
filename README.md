@@ -7,14 +7,30 @@ A bash script which communicates with GitHub, Jira and Jenkins REST APIs and gen
 ### Prerequisites
 
 * Install jq.
-```
-$ sudo apt-get install jq
-```
 
-* Set a system variable SUPPORT_CARBON_APIMGT_HOME with the location to carbon-apimgt repo.
-```
-$ export SUPPORT_CARBON_APIMGT_HOME="/home/malintha/wso2apim/gitworkspace/supportgit/apim210/carbon-apimgt-1"
-```
+  ```
+  $ sudo apt-get install jq
+  ```
+
+* Set a system variable WSO2AM210\_ZIP\_PATH with the location to API Manager 2.1.0 zip file.
+
+  ```
+  $ export WSO2AM210_ZIP_PATH="export WSO2AM210_ZIP_PATH=/work-2/soft/wso2/wso2am-2.1.0.zip"
+  ```
+
+* Set a system variable SUPPORT\_CARBON\_APIMGT\_HOME with the location to carbon-apimgt repo. Make sure carbon-apimgt repo is up-to-date. Keep it switched to `support-6.1.66` branch.
+
+  ```
+  $ export SUPPORT_CARBON_APIMGT_HOME="/home/malintha/wso2apim/gitworkspace/supportgit/apim210/carbon-apimgt-1"
+  ```
+
+* Make sure a [Jenkins build](https://supportbuild-wilkes.wso2.com/jenkins/job/carbon-apimgt-6.1.66) has already run with your recent changes.
+
+* Obtain a github token. Refer [https://github.com/settings/tokens](https://github.com/settings/tokens)
+
+* \(Optional\) Install [WSO2 Update Creator Tool](https://github.com/wso2/update-creator-tool/releases) 
+
+* \(Optional\) Copy `LICENSE.txt` and `NOT_A_CONTRIBUTION.txt` files to `resources` folder
 
 ### Usage:
 
@@ -27,30 +43,30 @@ $ create-apim-update 5abd6ab787eb1d6f7723456da35cba235ba1234b pull-requests.txt 
 
 ### Inputs:
 
-* A github token. Refer https://github.com/settings/tokens
-* A file containing a list of PRs (**pull-requests.txt**)
-```
-https://github.com/wso2-support/carbon-apimgt/pull/293
-https://github.com/wso2-support/carbon-apimgt/pull/280
-https://github.com/wso2-support/carbon-apimgt/pull/286
-https://github.com/wso2-support/carbon-apimgt/pull/305
-https://github.com/wso2-support/carbon-apimgt/pull/292
-https://github.com/wso2-support/carbon-apimgt/pull/296
-```
-* A file containing a list of issue URLs (**issues.txt**)
-```
-https://wso2.org/jira/browse/APIMANAGER-5872
-https://wso2.org/jira/browse/APIMANAGER-5880
-https://wso2.org/jira/browse/APIMANAGER-4970
-https://wso2.org/jira/browse/APIMANAGER-5719
-https://wso2.org/jira/browse/APIMANAGER-5759
-https://github.com/wso2/product-apim/issues/1563
-```
+* Github token.
+* A file containing a list of PRs \(**pull-requests.txt**\)
+  ```
+  https://github.com/wso2-support/carbon-apimgt/pull/293
+  https://github.com/wso2-support/carbon-apimgt/pull/280
+  https://github.com/wso2-support/carbon-apimgt/pull/286
+  https://github.com/wso2-support/carbon-apimgt/pull/305
+  https://github.com/wso2-support/carbon-apimgt/pull/292
+  https://github.com/wso2-support/carbon-apimgt/pull/296
+  ```
+* A file containing a list of issue URLs \(**issues.txt**\)
 
-* Update number (**1610**)
-* WSO2 email username (**user@wso2.com**)
+  ```
+  https://wso2.org/jira/browse/APIMANAGER-5872
+  https://wso2.org/jira/browse/APIMANAGER-5880
+  https://wso2.org/jira/browse/APIMANAGER-4970
+  https://wso2.org/jira/browse/APIMANAGER-5719
+  https://wso2.org/jira/browse/APIMANAGER-5759
+  https://github.com/wso2/product-apim/issues/1563
+  ```
 
+* Update number \(**1610**\)
 
+* WSO2 email username \(**user@wso2.com**\)
 
 ### Outputs of the command:
 
@@ -65,39 +81,40 @@ WSO2-CARBON-UPDATE-4.4.0-1610
 ======================
 WSO2-CARBON-UPDATE-4.4.0-1610
 ├── carbon.home
-│   └── repository
-│       ├── components
-│       │   └── plugins
-│       │       ├── org.wso2.carbon.apimgt.gateway_6.1.66.jar
-│       │       └── org.wso2.carbon.apimgt.jms.listener_6.1.66.jar
-│       └── deployment
-│           └── server
-│               ├── jaggeryapps
-│               │   └── publisher
-│               │       └── site
-│               │           └── themes
-│               │               └── wso2
-│               │                   ├── libs
-│               │                   │   └── load-tabs.js
-│               │                   └── templates
-│               │                       ├── item-design
-│               │                       │   └── template.jag
-│               │                       ├── item-implement
-│               │                       │   ├── initializer.jag
-│               │                       │   ├── js
-│               │                       │   │   └── api-implementation.js
-│               │                       │   └── template.jag
-│               │                       └── life-cycles
-│               │                           └── template.jag
-│               └── webapps
-│                   ├── api#am#publisher#v0.11.war
-│                   └── api#am#store#v0.11.war
+│   └── repository
+│       ├── components
+│       │   └── plugins
+│       │       ├── org.wso2.carbon.apimgt.gateway_6.1.66.jar
+│       │       └── org.wso2.carbon.apimgt.jms.listener_6.1.66.jar
+│       └── deployment
+│           └── server
+│               ├── jaggeryapps
+│               │   └── publisher
+│               │       └── site
+│               │           └── themes
+│               │               └── wso2
+│               │                   ├── libs
+│               │                   │   └── load-tabs.js
+│               │                   └── templates
+│               │                       ├── item-design
+│               │                       │   └── template.jag
+│               │                       ├── item-implement
+│               │                       │   ├── initializer.jag
+│               │                       │   ├── js
+│               │                       │   │   └── api-implementation.js
+│               │                       │   └── template.jag
+│               │                       └── life-cycles
+│               │                           └── template.jag
+│               └── webapps
+│                   ├── api#am#publisher#v0.11.war
+│                   └── api#am#store#v0.11.war
 └── update-descriptor.yaml
 
 16 directories, 6 files
 ```
 
 #### `update-descriptor.yaml` generated for the above **pull-requests.txt** and **issues.txt**
+
 ```
 update_number: 1610
 platform_version: 4.4.0
@@ -126,5 +143,4 @@ file_changes:
   - repository/components/plugins/org.wso2.carbon.apimgt.jms.listener_6.1.66.jar
   - repository/deployment/server/webapps/api#am#publisher#v0.11.war
   - repository/deployment/server/webapps/api#am#store#v0.11.war
-
 ```
