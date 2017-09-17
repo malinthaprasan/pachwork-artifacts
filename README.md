@@ -108,9 +108,10 @@ WSO2-CARBON-UPDATE-4.4.0-1610
 │               └── webapps
 │                   ├── api#am#publisher#v0.11.war
 │                   └── api#am#store#v0.11.war
+├── LICENSE.txt
+├── NOT_A_CONTRIBUTION.txt
 └── update-descriptor.yaml
 
-16 directories, 6 files
 ```
 
 #### `update-descriptor.yaml` generated for the above **pull-requests.txt** and **issues.txt**
