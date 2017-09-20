@@ -41,6 +41,8 @@ $ create-apim-update <github-token> <pull-requests-filename> <issues-filename> <
 $ create-apim-update 5abd6ab787eb1d6f7723456da35cba235ba1234b pull-requests.txt issues.txt 1610 user@wso2.com
 ```
 
+#### Note: In order to use the Support Jenkins REST API, the tool will prompt you for the password for the WSO2 account.
+
 ### Inputs:
 
 * Github token.
